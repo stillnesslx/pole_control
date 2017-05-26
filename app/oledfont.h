@@ -14,6 +14,7 @@ extern const char hzk[][32];
 extern const unsigned char F16X24[];
 extern const unsigned char ascii_8x16[];
 extern const unsigned char ascii_6x8_sys[][6];
+extern const unsigned char ascii_16x24[];
 //extern const unsigned char ascii_6x8_kaiti[][6];
 //extern const unsigned char ascii_6x8_youyuan[][6];
 //extern const unsigned char ascii_6x8_songti[][6];

@@ -31,6 +31,7 @@
 #include "oled.h"
 #include "stdlib.h"
 #include <stdio.h>
+#include <string.h>
 #include "oledfont.h"  	 
 #include "stm32f10x.h"	
 #include "stm32f10x_gpio.h"
@@ -200,17 +201,17 @@ void OLED_ShowChar_816(u8 x,u8 y,u8 chr)
 {
     unsigned char c=0,i=0;	
     //c=chr-' ';//得到偏移后的值
-    c=chr-'0';//得到偏移后的值
+    c=chr;//得到偏移后的值
     if(x>Max_Column-1){x=0;y=y+2;}
     OLED_Set_Pos(x,y);
     for(i=0;i<16;i++)
-        OLED_WR_Byte(F16X24[c*48+i],OLED_DATA);
+        OLED_WR_Byte(ascii_16x24[c*48+i],OLED_DATA);
     OLED_Set_Pos(x,y+1);
     for(i=0;i<16;i++)
-        OLED_WR_Byte(F16X24[c*48+i+16],OLED_DATA);
+        OLED_WR_Byte(ascii_16x24[c*48+i+16],OLED_DATA);
     OLED_Set_Pos(x,y+2);
     for(i=0;i<16;i++)
-        OLED_WR_Byte(F16X24[c*48+i+32],OLED_DATA);
+        OLED_WR_Byte(ascii_16x24[c*48+i+32],OLED_DATA);
 }
 void OLED_ShowString_816(u8 x,u8 y,u8 *chr)
 {
@@ -255,7 +256,19 @@ void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 size)
         OLED_ShowChar_816(x+(size/2)*t,y,temp+'0');
         //OLED_ShowChar_816(x+(size/2)*t,y,temp+'0');
 	}
-} 
+}
+void oled091_show_float(u8 x,u8 y,float num,u8 size,const unsigned char ch[],const char fm[])
+{
+    char buf[16];
+    u8 i;
+    //sprintf(buf,"%6.2f",num);
+    sprintf(buf,fm,num);
+	for(i=0;i<strlen(buf);i++)
+	{
+        OLED_ShowChar_816(x+(size/2)*i,y,buf[i]);
+	}
+}
+
 //显示一个字符号串
 void OLED_ShowString(u8 x,u8 y,u8 *chr)
 {

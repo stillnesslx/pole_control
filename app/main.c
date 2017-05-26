@@ -58,7 +58,7 @@ information. */
 //char RxBuffer1[512];
 //uint8_t RxCounter1=0;
 
-u8 hx = 48,hy = 0,hlen = 3,hsize = 32;
+u8 hx = 24,hy = 0,hlen = 3,hsize = 32;
 u32 h = 60;
 u8 test_en=0;
 const uint8_t high[3] = {50,100,150};
@@ -167,7 +167,7 @@ int main(void)
 #define COM_REV_NUM_MSG         8
 
 
-u16 oled242_delay = 1000;
+u16 oled242_delay = 2000;
 extern uint8_t POS_X_HIGH,POS_Y_HIGH;
 uint8_t oled_cmd = 0;
 char chr_test = 82;
@@ -192,7 +192,32 @@ uint8_t com_rev_data_buf[COM_REV_FRM_LEN];
 //00 dc
 //05 78
 //0e 12 25 50
-//
+
+
+//little
+//0xaa 0x44 0xc2 0x01 0x01 0x26 0x46 0xa1 0xaa 0x40 0x85 0x37 0x64 0xc0 0x08 0xbc 0x07 0xc0 0x07 0x83 0x01 0xf4 0x00 0x00 0x00 0x00 0x00 0x00 0x0e 0xd8 0x00 0xdc 0x08 0xe8 0x00 0x01 0x00 0x00
+//AA 44 C2 01 01 00 1C 00 60 85 47 AF C0 72 20 43 DC 05 70 05 66 08 DB 05 02 00 02 00 18 10 86 01 EC 04 00 00 13 60 19 01
+//AA 44 C2 01 01 00 1C 00 C0 64 37 85 40 AA A1 46 F4 01 83 07 BC 08 C0 07 01 00 01 00 D8 0E DC 00 18 06 00 00 4C 73 D7 DD
+//AA 44 C2 01 01 00 1C 00 C0 64 37 85 40 AA A1 46 F4 01 83 07 BC 08 C0 07 01 00 01 00 D8 0E DC 00 96 05 00 00 CA 72 D7 DD
+//aa 44
+//c2
+//01
+//01 00
+//1c 00
+//c0 64 37 85
+//40 aa a1 46
+//f4 01
+//83 07
+//bc 08
+//c0 07
+//01 00
+//01 00
+//d8 0e
+//dc 00
+//78 05
+//00 00
+//ac 72 d7 dd
+
 void memcpy_word(u16 *src,u16 *det,u8 len)
 {
     while(len--)
@@ -200,10 +225,16 @@ void memcpy_word(u16 *src,u16 *det,u8 len)
         *src++ = *det++;
     }
 }
+union
+{
+    uint32_t dw;
+    uint8_t bt[4];
+}stest;
 static void oled242_ch_task(void *pvParameters )
 {
     //u8 stat = 0;
     uint8_t rd_cnt=0;
+
 	( void ) pvParameters;
     //oled_init_display();
     //oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,16);
@@ -231,28 +262,38 @@ static void oled242_ch_task(void *pvParameters )
                 fifoBuf_getData(&com_fifo, &com_rev_data_buf[2], COM_REV_FRM_LEN-2);
                 for(i=0;i<COM_REV_FRM_LEN/4-1;i++)
                 {
-                    crc += *(uint32_t *)&com_rev_data_buf;
+                    crc += *(uint32_t *)&com_rev_data_buf[i*4];
                 }
-                rcrc = SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_FRM_LEN-4]);
+                rcrc = *(uint32_t *)&com_rev_data_buf[COM_REV_FRM_LEN-4];
                 if((COM_DATA_MSGID == com_rev_data_buf[2])
-                    && (COM_DATA_SRCID == com_rev_data_buf[3]) 
-                    && (COM_DATA_LEN == ((uint16_t)com_rev_data_buf[6]<<8) | com_rev_data_buf[7])
-                    && (crc == SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_FRM_LEN-4])))
+                    && (COM_DATA_SRCID == com_rev_data_buf[3])
+                    && (COM_DATA_LEN == (*(uint16_t *)&com_rev_data_buf[6]))
+                    && (crc == (*(uint32_t *)&com_rev_data_buf[COM_REV_FRM_LEN-4])))
                 {
                     //memcpy_word((u16 *)&dsp_data,(u16 *)&com_rev_data_buf[COM_REV_NUM_MSG],sizeof(struct display_data)/2);
-                    dsp_data.latitude = SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_NUM_MSG]);
-                    dsp_data.longitude = SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_NUM_MSG+4]);
-                    dsp_data.high = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+8]);
-                    dsp_data.yaw = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+10]);
-                    dsp_data.pitch = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+12]);
-                    dsp_data.roll = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+14]);
-                    dsp_data.mode = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+16]);
-                    dsp_data.alarm = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+18]);
-                    dsp_data.voltage = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+20]);
-                    dsp_data.current = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+22]);
-                    dsp_data.tempt = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+24]);
+                    //dsp_data.longitude = SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_NUM_MSG]);
+                    //dsp_data.latitude = SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_NUM_MSG+4]);
+                    //dsp_data.high = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+8]);
+                    //dsp_data.yaw = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+10]);
+                    //dsp_data.pitch = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+12]);
+                    //dsp_data.roll = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+14]);
+                    //dsp_data.mode = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+16]);
+                    //dsp_data.alarm = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+18]);
+                    //dsp_data.voltage = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+20]);
+                    //dsp_data.current = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+22]);
+                    //dsp_data.tempt = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+24]);
                     //dsp_data.resv = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+26]);
-                }
+                    dsp_data.longitude = *(uint32_t *)&com_rev_data_buf[COM_REV_NUM_MSG];
+                    dsp_data.latitude = *(uint32_t *)&com_rev_data_buf[COM_REV_NUM_MSG+4];
+                    dsp_data.high = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+8];
+                    dsp_data.yaw = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+10];
+                    dsp_data.pitch = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+12];
+                    dsp_data.roll = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+14];
+                    dsp_data.mode = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+16];
+                    dsp_data.alarm = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+18];
+                    dsp_data.voltage = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+20];
+                    dsp_data.current = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+22];
+                    dsp_data.tempt = *(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+24];                }
             }
         }
 
@@ -360,7 +401,7 @@ static void oled242_ch_task(void *pvParameters )
     //        oled_show_char(108,6,chr_test,12,0);
             if(test_en)
             oled_show_char(96,4,chr_test,16,0,F8X16);
-            //stat = 1;
+            stat = 1;
         }
         else if(1 == stat)
         {
@@ -382,7 +423,7 @@ static void oled242_ch_task(void *pvParameters )
             oled_show_string(POS_CH_LAT_X,POS_CH_LAT_Y+4,"           \x7f",16,F8X16);
             oled_show_float(POS_CH_LAT_X,POS_CH_LAT_Y+4,fabs(dsp_data.longitude/10000000.0f-180.0f),16,F8X16,"%11.7f");
             oled_show_char(POS_CH_LAT_X+96,POS_CH_LAT_Y+4,(dsp_data.longitude/10000000.0f-180.0f)>0?'E':'W',16,0,F8X16);
-            //stat = 2;
+            stat = 2;
         }
         else if(2 == stat)
         {
@@ -409,7 +450,7 @@ static void oled242_ch_task(void *pvParameters )
             oled_show_char(POS_CH_ATT_X+48,POS_CH_ATT_Y+4,':',16,0,F8X16);
             oled_show_string(POS_CH_ATT_X+56,POS_CH_ATT_Y+4,"     \x7f",16,F8X16);
             oled_show_float(POS_CH_ATT_X+56,POS_CH_ATT_Y+4,dsp_data.roll/10.0f-180,16,F8X16,"%5.1f");
-            //stat = 0;
+            stat = 0;
         }
         else
         {
@@ -469,13 +510,14 @@ static void oled091_task(void *pvParameters )
     OLED_Clear();
     (void) pvParameters;
     //OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
-    OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
+    //OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
     for(;;)
     {
         //OLED_Clear();
         //OLED_ShowCHinese(hx,hy,0,0);//жа
         xSemaphoreTake( xSemaphore, portMAX_DELAY );
-        OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
+        //OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
+        oled091_show_float(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1]+(float)(ADCConvertedValue-2048)/2048.0f*50.0f,32,F16X24,"%5.1f");
         //vTaskDelay( 100 / portTICK_PERIOD_MS ); /* Delay 100 ms */
     }
 }
