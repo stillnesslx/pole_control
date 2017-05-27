@@ -410,7 +410,7 @@ static void oled242_ch_task(void *pvParameters )
             oled_show_chinese(POS_CH_HI_X+16,POS_CH_HI_Y,6,0);//¶È
             oled_show_string(POS_CH_HI_X+32,POS_CH_HI_Y,":     m",16,F8X16);
             //oled_show_char(POS_CH_HI_X+32,POS_CH_HI_Y,':',16,0,F8X16);
-            oled_show_float(POS_CH_HI_X+40,POS_CH_HI_Y,high[((di_value.di_filtered & 0x300) >> 8) -1]+(float)(ADCConvertedValue-2048)/2048.0f*50.0f,16,F8X16,"%5.1f");
+            oled_show_float(POS_CH_HI_X+40,POS_CH_HI_Y,dsp_data.high/10.0f,16,F8X16,"%5.1f");
 
             oled_show_chinese(POS_CH_LAT_X+0,POS_CH_LAT_Y,18,0);//¾­
             oled_show_chinese(POS_CH_LAT_X+16,POS_CH_LAT_Y,31,0);//Î³

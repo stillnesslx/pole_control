@@ -71,13 +71,13 @@ struct di_data
     uint16_t di_filter_num[DI_CHANNEL_NUM];
 };
 
-struct com_receive_data
-{
-    char addr;
-    char code;
-    char data[COM_DATA_LEN];
-    char crc;
-};
+//struct com_receive_data
+//{
+//    char addr;
+//    char code;
+//    char data[COM_DATA_LEN];
+//    char crc;
+//};
 struct com_send_data
 {
     uint8_t sync1;

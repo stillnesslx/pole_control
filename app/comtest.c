@@ -174,8 +174,10 @@ static portTASK_FUNCTION( vComTxTask, pvParameters )
 {
 //char cByteToSend;
     unsigned char i;
-TickType_t xTimeToWait;
+    signed char buf[sizeof(struct com_send_data)+1];
+    TickType_t xTimeToWait;
 
+    buf[sizeof(struct com_send_data)] = '\0';
 	/* Just to stop compiler warnings. */
 	( void ) pvParameters;
 
@@ -183,14 +185,32 @@ TickType_t xTimeToWait;
 	{
 		/* Simply transmit a sequence of characters from comFIRST_BYTE to
 		comLAST_BYTE. */
-        com_sdata.data.in = di_value.di_new & 0xfff;
+        com_sdata.data.in = di_value.di_filtered & (((uint32_t)1 << DI_CHANNEL_NUM) -1);
         com_sdata.data.ana = ADCConvertedValue;
         com_sdata.crc = 0;
         for(i=0;i<sizeof(struct com_send_data)/4-1;i++)
         {
             com_sdata.crc += *((uint32_t *)&com_sdata + i);
         }
-        vSerialPutString( xPort, (const signed char * ) &com_sdata, sizeof(struct com_send_data));
+        buf[0] = com_sdata.sync1;
+        buf[1] = com_sdata.sync2;
+        buf[2] = com_sdata.msg_id;
+        buf[3] = com_sdata.src_id;
+        buf[4] = com_sdata.sqn & 0xff;
+        buf[5] = (com_sdata.sqn & 0xff00) >> 8;
+        com_sdata.sqn++;
+        buf[6] = com_sdata.msg_len & 0xff;
+        buf[7] = (com_sdata.msg_len & 0xff00) >> 8;
+        buf[8] = com_sdata.data.in & 0xff;
+        buf[9] = (com_sdata.data.in & 0xff00) >> 8;
+        buf[10] = com_sdata.data.ana & 0xff;
+        buf[11] = (com_sdata.data.ana & 0xff00) >> 8;
+        buf[12] = com_sdata.crc & 0xff;
+        buf[13] = (com_sdata.crc & 0xff00) >> 8;
+        buf[14] = (com_sdata.crc & 0xff0000) >> 16;
+        buf[15] = (com_sdata.crc & 0xff000000) >> 24;
+        
+        vSerialPutNumber( xPort, (const signed char * ) buf, sizeof(struct com_send_data));
 //		for( cByteToSend = comFIRST_BYTE; cByteToSend <= comLAST_BYTE; cByteToSend++ )
 //		{
 //			if( xSerialPutChar( xPort, cByteToSend, comNO_BLOCK ) == pdPASS )

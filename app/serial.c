@@ -211,6 +211,30 @@ signed char *pxNext;
 }
 /*-----------------------------------------------------------*/
 
+void vSerialPutNumber( xComPortHandle pxPort, const signed char * const pcString, unsigned short usStringLength )
+{
+signed char *pxNext;
+
+	/* A couple of parameters that this port does not use. */
+	//( void ) usStringLength;
+	( void ) pxPort;
+
+	/* NOTE: This implementation does not handle the queue being full as no
+	block time is used! */
+
+	/* The port handle is not required as this driver only supports UART1. */
+	( void ) pxPort;
+
+	/* Send each character in the string, one at a time. */
+	pxNext = ( signed char * ) pcString;
+	while(usStringLength--)
+	{
+		xSerialPutChar( pxPort, *pxNext, serNO_BLOCK );
+		pxNext++;
+	}
+}
+/*-----------------------------------------------------------*/
+
 signed portBASE_TYPE xSerialPutChar( xComPortHandle pxPort, signed char cOutChar, TickType_t xBlockTime )
 {
 signed portBASE_TYPE xReturn;

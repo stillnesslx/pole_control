@@ -16,8 +16,9 @@ t_fifo_buffer com_fifo;
 #define ADC1_DR_Address    ((uint32_t)0x4001244C)
 
 struct di_data di_value;
-struct display_data dsp_data = {0,0,0,0,0,0,0,0,0,0,0};
-struct com_send_data com_sdata = {0xaa,0x44,0xc2,0x01,0x01,0x04,{0,0},0};
+//struct display_data dsp_data = {0,0,0,0,0,0,0,0,0,0,0};
+struct display_data dsp_data = {2964600000,1299200000,500,1901,2033,1702,0,0,4030,56,1380};
+struct com_send_data com_sdata = {0xaa,0x44,0xc2,0x01,0x01,0x4,{0,0},0};
 
 uint8_t com_rev_buf[COM_REV_BUF_LEN];
 
@@ -49,7 +50,7 @@ void gpio_init(void)
 void bsp_init(void)
 {
 	gpio_init();
-	di_init(0xfff);
+	di_init(((uint32_t)1 << DI_CHANNEL_NUM) -1);
     adc_init();
     spi_init();
     //usart1_init();
@@ -139,7 +140,7 @@ void adc_init(void)
     ADC_Init(ADC1, &ADC_InitStructure);
 
     /* ADC1 regular channel14 configuration */ 
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 1, ADC_SampleTime_55Cycles5);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_55Cycles5);
 
     /* Enable ADC1 DMA */
     ADC_DMACmd(ADC1, ENABLE);
