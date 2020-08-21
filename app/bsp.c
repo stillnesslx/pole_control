@@ -1,26 +1,29 @@
 //RuiXiaoliang 20170512
 #include "bsp.h"
-#include "oled.h"
-#include "oo_oled.h"
+//#include "oled.h"
+//#include "oo_oled.h"
+//#include "spi_port.h"
+#include "w5500_init.h"
 
 
 
-GPIO_InitTypeDef GPIO_InitStructure;
-USART_InitTypeDef USART_InitStructure;
-ADC_InitTypeDef ADC_InitStructure;
-DMA_InitTypeDef DMA_InitStructure;
-__IO uint16_t ADCConvertedValue;
+//GPIO_InitTypeDef GPIO_InitStructure;
+//USART_InitTypeDef USART_InitStructure;
+//ADC_InitTypeDef ADC_InitStructure;
+//DMA_InitTypeDef DMA_InitStructure;
+//__IO uint16_t ADCConvertedValue;
 
-t_fifo_buffer com_fifo;
+//t_fifo_buffer com_fifo;
 
-#define ADC1_DR_Address    ((uint32_t)0x4001244C)
+//#define ADC1_DR_Address    ((uint32_t)0x4001244C)
 
 struct di_data di_value;
+struct do_data do_value = {0xffffffff};
 //struct display_data dsp_data = {0,0,0,0,0,0,0,0,0,0,0};
-struct display_data dsp_data = {2964600000,1299200000,500,1901,2033,1702,0,0,4030,56,1380};
-struct com_send_data com_sdata = {0xaa,0x44,0xc2,0x01,0x01,0x4,{0,0},0};
+//struct display_data dsp_data = {2964600000,1299200000,500,1901,2033,1702,0,0,4030,56,1380};
+//struct com_send_data com_sdata = {0xaa,0x44,0xc2,0x01,0x01,0x4,{0,0},0};
 
-uint8_t com_rev_buf[COM_REV_BUF_LEN];
+//uint8_t com_rev_buf[COM_REV_BUF_LEN];
 
 void di_init(u32 init);
 void adc_init(void);
@@ -29,37 +32,76 @@ void spi_init(void);
 
 void gpio_init(void)
 {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE);
+    GPIO_InitTypeDef GPIO_InitStructure;
+    //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD, ENABLE);
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+    //DO
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_12;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_15;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5
-					 | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_12;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+    GPIO_SetBits(GPIOA,GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_12);
+    GPIO_SetBits(GPIOB,GPIO_Pin_3 |GPIO_Pin_15);
+    GPIO_SetBits(GPIOC,GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_12);
+	//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5
+					 //| GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
+    //GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    //GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    //GPIO_Init(GPIOC, &GPIO_InitStructure);
+    
+    //DI
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_11 | GPIO_Pin_15;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_4 | GPIO_Pin_5
+                    | GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11
+                    | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4
+                    | GPIO_Pin_5 | GPIO_Pin_11 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+    
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+
 }
 void bsp_init(void)
 {
 	gpio_init();
-	di_init(((uint32_t)1 << DI_CHANNEL_NUM) -1);
-    adc_init();
-    spi_init();
+    //spi_init();
+    w5500_init();
+	//di_init(((uint32_t)1 << DI_CHANNEL_NUM) -1);
+    //adc_init();
+    //spi_init();
     //usart1_init();
+    di_init(0x3fffffff);
 }
 
-void di_init(u32 init)
+void di_init(uint32_t init)
 {
-    u16 i;
-    di_value.di_new = 0;
+    uint16_t i;
+    di_value.di_new = init;
     di_value.di_filtered = init;//
     for(i=0;i<DI_CHANNEL_NUM;i++)
     {
@@ -71,13 +113,28 @@ void di_init(u32 init)
 void read_di(struct di_data *p)
 {
     /* Read a half-word from the memory */
-    u16 i = 0;
-    u32 tmp;
-    p->di_new  =  GPIO_ReadInputData(GPIOC);
+    uint16_t i = 0;
+    uint32_t tmp_di = 0;
+    uint32_t tmp_dia = 0;
+    uint32_t tmp_dib = 0;
+    uint32_t tmp_dic = 0;
+    uint32_t tmp_did = 0;
+    uint32_t tmp;
+    //p->di_new  =  GPIO_ReadInputData(GPIOC);
+    //p->di_new  =  GPIO_ReadOutputDataBit(GPIOA,GPIO_Pin_0);
+    tmp_dia = GPIO_ReadInputData(GPIOA) & 0x8807;
+    tmp_dib = GPIO_ReadInputData(GPIOB) & 0x7ff7;
+    tmp_dic = GPIO_ReadInputData(GPIOC) & 0xe83f;
+    tmp_did = GPIO_ReadInputData(GPIOD) & 0x0004;
+    tmp_di = (tmp_dia & 0x07) | ((tmp_dia & 0x0800) >> 8) | ((tmp_dia & 0x8000) >> 11); //5bit
+    tmp_di |= ((tmp_dib & 0x07) << 5) | ((tmp_dib & 0x7ff0) << 4);                      //14bit
+    tmp_di |= ((tmp_dic & 0x3f) << 19) | ((tmp_dic & 0x800) << 14) | ((tmp_dic & 0xe000) << 13);    //10bit
+    tmp_di |= (tmp_did & 0x04) << 27;   //1bit
+    p->di_new = tmp_di;
     tmp = p->di_new ^ p->di_filtered;
     while(i < DI_CHANNEL_NUM)
     {
-        if(0 == (tmp & ((u32)1<<i)))
+        if(0 == (tmp & ((uint32_t)1<<i)))
         {
             p->di_timer[i] = 0;
         }
@@ -86,83 +143,43 @@ void read_di(struct di_data *p)
             ++p->di_timer[i];
             if(p->di_timer[i] > p->di_filter_num[i])
             {
-                p->di_filtered &= ~((u32)1<<i);
-                p->di_filtered |=  ((u32)1<<i) & p->di_new;
+                p->di_filtered &= ~((uint32_t)1<<i);
+                p->di_filtered |=  ((uint32_t)1<<i) & p->di_new;
                 p->di_timer[i] = 0;
             }
         }
         ++i;
     }
 }
-void adc_init(void)
+void write_do(struct do_data value)
 {
-    /* ADCCLK = PCLK2/4 */
-    RCC_ADCCLKConfig(RCC_PCLK2_Div4); 
-    /* Enable peripheral clocks ------------------------------------------------*/
-    /* Enable DMA1 clock */
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-
-    /* Enable ADC1 and GPIOC clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1 | RCC_APB2Periph_GPIOA, ENABLE);
-
-    /* Configure PC.04 (ADC Channel14) as analog input -------------------------*/
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_WriteBit(GPIOA, GPIO_Pin_8, (BitAction)(value.led1));
+    GPIO_WriteBit(GPIOA, GPIO_Pin_9, (BitAction)(value.lift_drop));
+    GPIO_WriteBit(GPIOA, GPIO_Pin_10, (BitAction)(value.m_start));
+    GPIO_WriteBit(GPIOA, GPIO_Pin_12, (BitAction)(value.m_brake));
     
-
-
-    /* DMA1 channel1 configuration ----------------------------------------------*/
-    DMA_DeInit(DMA1_Channel1);
-    DMA_InitStructure.DMA_PeripheralBaseAddr = ADC1_DR_Address;
-    DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&ADCConvertedValue;
-    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-    DMA_InitStructure.DMA_BufferSize = 1;
-    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
-    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-    DMA_Init(DMA1_Channel1, &DMA_InitStructure);
-
-    /* Enable DMA1 channel1 */
-    DMA_Cmd(DMA1_Channel1, ENABLE);
-
-    /* ADC1 configuration ------------------------------------------------------*/
-    ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
-    ADC_InitStructure.ADC_ScanConvMode = ENABLE;
-    ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
-    ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
-    ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-    ADC_InitStructure.ADC_NbrOfChannel = 1;
-    ADC_Init(ADC1, &ADC_InitStructure);
-
-    /* ADC1 regular channel14 configuration */ 
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1, ADC_SampleTime_55Cycles5);
-
-    /* Enable ADC1 DMA */
-    ADC_DMACmd(ADC1, ENABLE);
-
-    /* Enable ADC1 */
-    ADC_Cmd(ADC1, ENABLE);
-
-    /* Enable ADC1 reset calibration register */   
-    ADC_ResetCalibration(ADC1);
-    /* Check the end of ADC1 reset calibration register */
-    while(ADC_GetResetCalibrationStatus(ADC1));
-
-    /* Start ADC1 calibration */
-    ADC_StartCalibration(ADC1);
-    /* Check the end of ADC1 calibration */
-    while(ADC_GetCalibrationStatus(ADC1));
-
-    /* Start ADC1 Software Conversion */ 
-    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+    GPIO_WriteBit(GPIOB, GPIO_Pin_3, (BitAction)(value.usr2));
+    GPIO_WriteBit(GPIOB, GPIO_Pin_15, (BitAction)(value.led6));
+    
+    GPIO_WriteBit(GPIOC, GPIO_Pin_6, (BitAction)(value.led5));
+    GPIO_WriteBit(GPIOC, GPIO_Pin_7, (BitAction)(value.led4));
+    GPIO_WriteBit(GPIOC, GPIO_Pin_8, (BitAction)(value.led3));
+    GPIO_WriteBit(GPIOC, GPIO_Pin_9, (BitAction)(value.led2));
+    GPIO_WriteBit(GPIOC, GPIO_Pin_10, (BitAction)(value.usr3));
+    GPIO_WriteBit(GPIOC, GPIO_Pin_12, (BitAction)(value.usr1));
+    //int i;
+    //for(i=0;i<DO_CHANNEL_NUM;i++)
+    //{
+        //if(0 != (value & ((uint32_t)(0x01) << i)))
+        //{
+            //GPIO_WriteBit(GPIOC, GPIO_Pin_9, (BitAction)((~led & 0x10) >> 4));
+        //}
+    //}
 }
 void usart1_init(void)
 {
+    GPIO_InitTypeDef GPIO_InitStructure;
+    USART_InitTypeDef USART_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
     
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
@@ -213,8 +230,44 @@ void usart1_init(void)
 	USART_Cmd(USART1, ENABLE);
 
 }
+
+#if 0
 void spi_init(void)
 {
+    SPI_InitTypeDef  SPI_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
+    
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_SetBits(GPIOA,GPIO_Pin_4);
+    
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	/*!< Configure sFLASH_SPI pins: MISO */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    /*!< Configure sFLASH_SPI pins: MOSI */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+
+	GPIO_SetBits(GPIOA,GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7);  //PB13/14/15上拉
+//#if 0
     SPI_InitTypeDef  SPI_InitStructure;
 
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -282,126 +335,10 @@ void spi_init(void)
     /*!< Enable the sFLASH_SPI  */
     SPI_Cmd(SPI2, ENABLE);
     
-    
-      OLED_RST_Set();
-	delay_ms(100);
-	OLED_RST_Clr();
-	delay_ms(200);
-	OLED_RST_Set(); 
-					  
-    OLED_WR_Byte(0xAE,OLED_CMD);//关闭显示
-	
-	OLED_WR_Byte(0x40,OLED_CMD);//---set low column address
-	OLED_WR_Byte(0xB0,OLED_CMD);//---set high column address
-
-	OLED_WR_Byte(0xC8,OLED_CMD);//-not offset
-
-	OLED_WR_Byte(0x81,OLED_CMD);//设置对比度
-	OLED_WR_Byte(0xff,OLED_CMD);
-
-	OLED_WR_Byte(0xa1,OLED_CMD);//段重定向设置
-
-	OLED_WR_Byte(0xa6,OLED_CMD);//
-	
-	OLED_WR_Byte(0xa8,OLED_CMD);//设置驱动路数
-	OLED_WR_Byte(0x1f,OLED_CMD);
-	
-	OLED_WR_Byte(0xd3,OLED_CMD);
-	OLED_WR_Byte(0x00,OLED_CMD);
-	
-	OLED_WR_Byte(0xd5,OLED_CMD);
-	OLED_WR_Byte(0xf0,OLED_CMD);
-	
-	OLED_WR_Byte(0xd9,OLED_CMD);
-	OLED_WR_Byte(0x22,OLED_CMD);
-	
-	OLED_WR_Byte(0xda,OLED_CMD);
-	OLED_WR_Byte(0x02,OLED_CMD);
-	
-	OLED_WR_Byte(0xdb,OLED_CMD);
-	OLED_WR_Byte(0x49,OLED_CMD);
-	
-	OLED_WR_Byte(0x8d,OLED_CMD);
-	OLED_WR_Byte(0x14,OLED_CMD);
-	
-	OLED_WR_Byte(0xaf,OLED_CMD);
-    
-    OLED_Clear();
-	OLED_Set_Pos(0,0); 
-//////////////////////////////////////////oled 091///////////////////////////////
-
-//    oled_242_wr_byte(0xAE,OLED_CMD);//关闭显示
-//	
-//	oled_242_wr_byte(0x40,OLED_CMD);//---set low column address
-//	oled_242_wr_byte(0xB0,OLED_CMD);//---set high column address
-
-//	oled_242_wr_byte(0xC8,OLED_CMD);//-not offset
-
-//	oled_242_wr_byte(0x81,OLED_CMD);//设置对比度
-//	oled_242_wr_byte(0xff,OLED_CMD);
-
-//	oled_242_wr_byte(0xa1,OLED_CMD);//段重定向设置
-
-//	oled_242_wr_byte(0xa6,OLED_CMD);//
-//	
-//	oled_242_wr_byte(0xa8,OLED_CMD);//设置驱动路数
-//	oled_242_wr_byte(0x1f,OLED_CMD);
-//	
-//	oled_242_wr_byte(0xd3,OLED_CMD);
-//	oled_242_wr_byte(0x00,OLED_CMD);
-//	
-//	oled_242_wr_byte(0xd5,OLED_CMD);
-//	oled_242_wr_byte(0xf0,OLED_CMD);
-//	
-//	oled_242_wr_byte(0xd9,OLED_CMD);
-//	oled_242_wr_byte(0x22,OLED_CMD);
-//	
-//	oled_242_wr_byte(0xda,OLED_CMD);
-//	oled_242_wr_byte(0x02,OLED_CMD);
-//	
-//	oled_242_wr_byte(0xdb,OLED_CMD);
-//	oled_242_wr_byte(0x49,OLED_CMD);
-//	
-//	oled_242_wr_byte(0x8d,OLED_CMD);
-//	oled_242_wr_byte(0x14,OLED_CMD);
-//	
-//	oled_242_wr_byte(0xaf,OLED_CMD);
-//////////////////////////////////////////oled 242///////////////////////////////
-    oled_242_wr_byte(0xAE,OLED_CMD);//--turn off oled panel
-    oled_242_wr_byte(0x00,OLED_CMD);//---set low column address
-    oled_242_wr_byte(0x10,OLED_CMD);//---set high column address
-    oled_242_wr_byte(0x40,OLED_CMD);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
-    oled_242_wr_byte(0x81,OLED_CMD);//--set contrast control register
-    oled_242_wr_byte(0xCF,OLED_CMD); // Set SEG Output Current Brightness
-    oled_242_wr_byte(0xA1,OLED_CMD);//--Set SEG/Column Mapping     0xa0???? 0xa1??
-    oled_242_wr_byte(0xC8,OLED_CMD);//Set COM/Row Scan Direction   0xc0???? 0xc8??
-    oled_242_wr_byte(0xA6,OLED_CMD);//--set normal display
-    oled_242_wr_byte(0xA8,OLED_CMD);//--set multiplex ratio(1 to 64)
-    oled_242_wr_byte(0x3f,OLED_CMD);//--1/64 duty
-    oled_242_wr_byte(0xD3,OLED_CMD);//-set display offset	Shift Mapping RAM Counter (0x00~0x3F)
-    oled_242_wr_byte(0x00,OLED_CMD);//-not offset
-    oled_242_wr_byte(0xd5,OLED_CMD);//--set display clock divide ratio/oscillator frequency
-    oled_242_wr_byte(0x80,OLED_CMD);//--set divide ratio, Set Clock as 100 Frames/Sec
-    oled_242_wr_byte(0xD9,OLED_CMD);//--set pre-charge period
-    oled_242_wr_byte(0xF1,OLED_CMD);//Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
-    oled_242_wr_byte(0xDA,OLED_CMD);//--set com pins hardware configuration
-    oled_242_wr_byte(0x12,OLED_CMD);
-    oled_242_wr_byte(0xDB,OLED_CMD);//--set vcomh
-    oled_242_wr_byte(0x40,OLED_CMD);//Set VCOM Deselect Level
-    oled_242_wr_byte(0x20,OLED_CMD);//-Set Page Addressing Mode (0x00/0x01/0x02)
-    oled_242_wr_byte(0x02,OLED_CMD);//
-    oled_242_wr_byte(0x8D,OLED_CMD);//--set Charge Pump enable/disable
-    oled_242_wr_byte(0x14,OLED_CMD);//--set(0x10) disable
-    oled_242_wr_byte(0xA4,OLED_CMD);// Disable Entire Display On (0xa4/0xa5)
-    oled_242_wr_byte(0xA6,OLED_CMD);// Disable Inverse Display On (0xa6/a7) 
-    oled_242_wr_byte(0xAF,OLED_CMD);//--turn on oled panel
-	
-	oled_242_wr_byte(0xAF,OLED_CMD); /*display ON*/ 
-	oled_clear();
-	oled_set_pos(0,0);
-    olde242_ch_logo_display();
-    
 }
+#endif
+
+
 void delay_ms(uint16_t t)
 {
     while(t--)

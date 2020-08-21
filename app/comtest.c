@@ -155,7 +155,7 @@ time the sequence is incorrect the the variable will stop being incremented. */
 static volatile UBaseType_t uxRxLoops = comINITIAL_RX_COUNT_VALUE;
 
 /*-----------------------------------------------------------*/
-
+#if 0
 void vAltStartComTestTasks( UBaseType_t uxPriority, uint32_t ulBaudRate, UBaseType_t uxLED )
 {
 	/* Initialise the com port then spawn the Rx and Tx tasks. */
@@ -168,6 +168,7 @@ void vAltStartComTestTasks( UBaseType_t uxPriority, uint32_t ulBaudRate, UBaseTy
 	xTaskCreate( vComTxTask, "COMTx", comSTACK_SIZE, NULL, uxPriority - 1, ( TaskHandle_t * ) NULL );
 	xTaskCreate( vComRxTask, "COMRx", comSTACK_SIZE, NULL, uxPriority, ( TaskHandle_t * ) NULL );
 }
+#endif
 /*-----------------------------------------------------------*/
 
 static portTASK_FUNCTION( vComTxTask, pvParameters )
