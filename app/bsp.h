@@ -33,6 +33,9 @@
 #include "fifo_buffer.h"
 
 #pragma anon_unions
+     
+typedef enum {FALSE = 0, TRUE = 1} bool;
+typedef enum {NORMAL = 0, FAULT = 1} FAULT_STATE;
 //DI PORTA PINs
 #define DI_PIN_USR2R        GPIO_Pin_0
 #define DI_PIN_USR3R        GPIO_Pin_1
@@ -108,12 +111,58 @@
 
 #define DO_CHANNEL_NUM 12
 
+#define DI_INIT_VALUE 0x3fffffff
 
 #define SWAP16(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))
 #define SWAP32(l) (((l) >> 24) | (((l) & 0x00ff0000) >> 8) | (((l) & 0x0000ff00) << 8)  | ((l) << 24))
 
 #define TEST_BIT(value,num) (0 != ((value) & ((uint32_t)0x01 << (num))))
 
+#define DI_TRUE 0
+#define DI_FALSE 1
+#define DO_VALID 0
+#define DO_INVALID 1
+
+
+struct di_bit_define
+{
+    uint32_t usr2r : 1;
+    uint32_t usr3r : 1;
+    uint32_t usr4r : 1;
+    uint32_t z1 : 1;
+    uint32_t brake : 1;
+    uint32_t sw8 : 1;
+    uint32_t sw7 : 1;
+    uint32_t sw6 : 1;
+    uint32_t usr2o : 1;
+    uint32_t sen1 : 1;
+    uint32_t sen2 : 1;
+    uint32_t sen3 : 1;
+    uint32_t liftr : 1;
+    uint32_t dropr : 1;
+    uint32_t sw5 : 1;
+    uint32_t sw4 : 1;
+    uint32_t stop_sw3 : 1;
+    uint32_t drop_sw2 : 1;
+    uint32_t lift_sw1 : 1;
+    uint32_t liftl : 1;
+    uint32_t dropl : 1;
+    uint32_t stopl : 1;
+    uint32_t usr1r : 1;
+    uint32_t key1 : 1;
+    uint32_t key2 : 1;
+    uint32_t usr3o : 1;
+    uint32_t stopr : 1;
+    uint32_t usr1l : 1;
+    uint32_t usr2l : 1;
+    uint32_t usr1o : 1;
+    uint32_t rsv : 2;
+};
+union di_define
+{
+    uint32_t all;
+    struct di_bit_define bit;
+};
 struct di_data
 {
     uint32_t di_new;
@@ -121,7 +170,8 @@ struct di_data
     union
     {
         uint32_t di_filtered;
-        struct
+        struct di_bit_define bit;
+        /*struct
         {
             uint32_t usr2r : 1;
             uint32_t usr3r : 1;
@@ -154,7 +204,7 @@ struct di_data
             uint32_t usr2l : 1;
             uint32_t usr1o : 1;
             uint32_t rsv : 2;
-        };
+        };*/
     };
     uint16_t di_timer[DI_CHANNEL_NUM];
     uint16_t di_filter_num[DI_CHANNEL_NUM];
@@ -182,9 +232,26 @@ struct do_data
         };
     };
 };
-
-
+union fault_code_def
+{
+    uint32_t all;
+    struct
+    {
+        uint32_t lift_drop_conflict : 1;
+        uint32_t relay_state : 1;
+        uint32_t brake_relay_timeout : 1;
+        uint32_t start_relay_timeout : 1;
+        uint32_t usr1_relay_timeout : 1;
+        uint32_t usr2_relay_timeout : 1;
+        uint32_t usr3_relay_timeout : 1;
+        //uint32_t relay_or_notfinish : 1;
+    }bit;
+};
+extern union fault_code_def fault_code;
 extern struct di_data di_value;
+extern union di_define di_value_pre;
+//extern struct di_data di_value_pre;
+
 extern struct display_data dsp_data;
 
 extern void read_di(struct di_data *p);

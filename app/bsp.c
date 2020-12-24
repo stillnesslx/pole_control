@@ -18,7 +18,10 @@
 //#define ADC1_DR_Address    ((uint32_t)0x4001244C)
 
 struct di_data di_value;
+union di_define di_value_pre;
+//struct di_data di_value_pre;
 struct do_data do_value = {0xffffffff};
+union fault_code_def fault_code;
 //struct display_data dsp_data = {0,0,0,0,0,0,0,0,0,0,0};
 //struct display_data dsp_data = {2964600000,1299200000,500,1901,2033,1702,0,0,4030,56,1380};
 //struct com_send_data com_sdata = {0xaa,0x44,0xc2,0x01,0x01,0x4,{0,0},0};
@@ -95,7 +98,7 @@ void bsp_init(void)
     //adc_init();
     //spi_init();
     //usart1_init();
-    di_init(0x3fffffff);
+    di_init(DI_INIT_VALUE);
 }
 
 void di_init(uint32_t init)
