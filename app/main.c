@@ -745,9 +745,7 @@ void start_fault_task(UBaseType_t prio)
 bool lift_condition(struct relays_in_fact *relays)
 {
     //if((CLOSE == relays->lift_remote.open_contact || CLOSE == relays->lift1.open_contact || DI_TRUE == di_value.bit.lift_sw1 || CLOSE == di_value.bit.liftl)
-    if((CLOSE == relays->lift_remote.open_contact || CLOSE == relays->lift.open_contact
-        || DI_TRUE == di_value.bit.lift_sw1 || DI_TRUE == di_value.bit.liftl
-        || DI_TRUE == di_value.bit.key1)
+    if((CLOSE == relays->lift_remote.open_contact || CLOSE == relays->lift.open_contact)
             && CLOSE == relays->drop_remote.close_contact
             && CLOSE == relays->stop_remote.close_contact
             && CLOSE == relays->stop_local.close_contact
@@ -763,9 +761,7 @@ bool lift_condition(struct relays_in_fact *relays)
 bool drop_condition(struct relays_in_fact *relays)
 {
     //if((CLOSE == relays->drop_remote.open_contact || CLOSE == relays->drop1.open_contact || DI_TRUE == di_value.bit.drop_sw2 || CLOSE == di_value.bit.dropl)
-    if((CLOSE == relays->drop_remote.open_contact || CLOSE == relays->drop.open_contact
-        || DI_TRUE == di_value.bit.drop_sw2 || DI_TRUE == di_value.bit.dropl
-        || DI_TRUE == di_value.bit.key2)
+    if((CLOSE == relays->drop_remote.open_contact || CLOSE == relays->drop.open_contact)
         && CLOSE == relays->lift_remote.close_contact
         && CLOSE == relays->stop_local.close_contact
         && CLOSE == relays->stop_remote.close_contact
