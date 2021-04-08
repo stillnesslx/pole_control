@@ -35,7 +35,7 @@
 #pragma anon_unions
      
 typedef enum {FALSE = 0, TRUE = 1} bool;
-typedef enum {NORMAL = 0, FAULT = 1} FAULT_STATE;
+typedef enum {NORMAL = 1, FAULT = 0} FAULT_STATE;
 //DI PORTA PINs
 #define DI_PIN_USR2R        GPIO_Pin_0
 #define DI_PIN_USR3R        GPIO_Pin_1

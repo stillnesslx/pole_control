@@ -20,7 +20,7 @@
 struct di_data di_value;
 union di_define di_value_pre;
 //struct di_data di_value_pre;
-struct do_data do_value = {0xffffffff};
+struct do_data do_value; // = {0xFFFFFC3C}; //{0xffffffff};
 union fault_code_def fault_code;
 //struct display_data dsp_data = {0,0,0,0,0,0,0,0,0,0,0};
 //struct display_data dsp_data = {2964600000,1299200000,500,1901,2033,1702,0,0,4030,56,1380};
@@ -55,7 +55,9 @@ void gpio_init(void)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-    GPIO_SetBits(GPIOA,GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_12);
+    //GPIO_SetBits(GPIOA,GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_12);
+    GPIO_SetBits(GPIOA,GPIO_Pin_8 | GPIO_Pin_10 | GPIO_Pin_12);
+    GPIO_ResetBits(GPIOA,GPIO_Pin_9);
     GPIO_SetBits(GPIOB,GPIO_Pin_3 |GPIO_Pin_15);
     GPIO_SetBits(GPIOC,GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_12);
 	//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5
@@ -99,6 +101,7 @@ void bsp_init(void)
     //spi_init();
     //usart1_init();
     di_init(DI_INIT_VALUE);
+    do_value.all = 0xfffffc3c;
 }
 
 void di_init(uint32_t init)

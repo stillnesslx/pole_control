@@ -45,5 +45,20 @@ void set_relay_contact(struct relay_DPDT *rly)
     rly->close_contact = RELEASE == rly->coil ? CLOSE : OPEN;
     //rly->or_flag = TRUE;
 }
-
+void set_relay_contact_operate(struct relay_DPDT *rly)
+{
+    //rly->coil = ror;
+    //rly->state = DONE;
+    rly->open_contact = CLOSE;
+    rly->close_contact = OPEN;
+    //rly->or_flag = TRUE;
+}
+void set_relay_contact_release(struct relay_DPDT *rly)
+{
+    //rly->coil = ror;
+    //rly->state = DONE;
+    rly->open_contact = OPEN;
+    rly->close_contact = CLOSE;
+    //rly->or_flag = TRUE;
+}
 //end of file

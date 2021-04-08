@@ -156,6 +156,7 @@ int main(void)
   /* Add your application code here*/
     
     vSemaphoreCreateBinary( xSemaphoreDi );
+    //xSemaphoreTake( xSemaphoreDi, portMAX_DELAY );
     delay_ms(200);
     bsp_init();
     read_di(&di_value);
@@ -235,64 +236,105 @@ static void work_task(void *pvParameters )
         di_cflg.all = di_value.di_filtered ^ di_value_pre.all;
         di_value_pre.all = di_value.di_filtered;
         //feed back relay. read feedback di and set contact//////////////////////////////////////////////////////////////////
-        if(TRUE == di_cflg.bit.brake && UNDONE == relays.brake_power.state)
+        if(TRUE == di_cflg.bit.brake)// && UNDONE == relays.brake_power.state)
         {
-            if((DI_TRUE == di_value.bit.brake && OPERATE == relays.brake_power.coil)
-                || (DI_FALSE == di_value.bit.brake && RELEASE == relays.brake_power.coil))
+//            if((DI_TRUE == di_value.bit.brake && OPERATE == relays.brake_power.coil)
+//                || (DI_FALSE == di_value.bit.brake && RELEASE == relays.brake_power.coil))
+//            {
+//                set_relay_contact(&relays.brake_power);
+//            }
+//            else
+//            {
+//                fault_code.bit.relay_state = TRUE;
+//            }
+            if(DI_TRUE == di_value.bit.brake)
             {
-                set_relay_contact(&relays.brake_power);
+                set_relay_contact_operate(&relays.brake_power);
             }
             else
             {
-                fault_code.bit.relay_state = TRUE;
+                set_relay_contact_release(&relays.brake_power);
             }
         }
-        if(TRUE == di_cflg.bit.z1 && UNDONE == relays.motor_start.state)
+        if(TRUE == di_cflg.bit.z1)// && UNDONE == relays.motor_start.state)
         {
-            if((DI_TRUE == di_value.bit.z1 && OPERATE == relays.motor_start.coil)
-                || (DI_FALSE == di_value.bit.z1 && RELEASE == relays.motor_start.coil))
+//            if((DI_TRUE == di_value.bit.z1 && OPERATE == relays.motor_start.coil)
+//                || (DI_FALSE == di_value.bit.z1 && RELEASE == relays.motor_start.coil))
+//            {
+//                set_relay_contact(&relays.motor_start);
+//            }
+//            else
+//            {
+//                fault_code.bit.relay_state = TRUE;
+//            }
+            if(DI_TRUE == di_value.bit.z1)
             {
-                set_relay_contact(&relays.motor_start);
+                set_relay_contact_operate(&relays.motor_start);
             }
             else
             {
-                fault_code.bit.relay_state = TRUE;
+                set_relay_contact_release(&relays.motor_start);
+            }
+
+        }
+        if(TRUE == di_cflg.bit.usr1o)// && UNDONE == relays.usr1_remote.state)
+        {
+//            if((DI_TRUE == di_value.bit.usr1o && OPERATE == relays.usr1_remote.coil)
+//                || (DI_FALSE == di_value.bit.usr1o && RELEASE == relays.usr1_remote.coil))
+//            {
+//                set_relay_contact(&relays.usr1_remote);
+//            }
+//            else
+//            {
+//                fault_code.bit.relay_state = TRUE;
+//            }
+            if(DI_TRUE == di_value.bit.usr1o)
+            {
+                set_relay_contact_operate(&relays.usr1_remote);
+            }
+            else
+            {
+                set_relay_contact_release(&relays.usr1_remote);
             }
         }
-        if(TRUE == di_cflg.bit.usr1o && UNDONE == relays.usr1_remote.state)
+        if(TRUE == di_cflg.bit.usr2o)// && UNDONE == relays.usr2_remote.state)
         {
-            if((DI_TRUE == di_value.bit.usr1o && OPERATE == relays.usr1_remote.coil)
-                || (DI_FALSE == di_value.bit.usr1o && RELEASE == relays.usr1_remote.coil))
+//            if((DI_TRUE == di_value.bit.usr2o && OPERATE == relays.usr2_remote.coil)
+//                || (DI_FALSE == di_value.bit.usr2o && RELEASE == relays.usr2_remote.coil))
+//            {
+//                set_relay_contact(&relays.usr2_remote);
+//            }
+//            else
+//            {
+//                fault_code.bit.relay_state = TRUE;
+//            }
+            if(DI_TRUE == di_value.bit.usr2o)
             {
-                set_relay_contact(&relays.usr1_remote);
+                set_relay_contact_operate(&relays.usr2_remote);
             }
             else
             {
-                fault_code.bit.relay_state = TRUE;
+                set_relay_contact_release(&relays.usr2_remote);
             }
         }
-        if(TRUE == di_cflg.bit.usr2o && UNDONE == relays.usr2_remote.state)
+        if(TRUE == di_cflg.bit.usr3o)// && UNDONE == relays.usr3_remote.state)
         {
-            if((DI_TRUE == di_value.bit.usr2o && OPERATE == relays.usr2_remote.coil)
-                || (DI_FALSE == di_value.bit.usr2o && RELEASE == relays.usr2_remote.coil))
+//            if((DI_TRUE == di_value.bit.usr3o && OPERATE == relays.usr3_remote.coil)
+//                || (DI_FALSE == di_value.bit.usr3o && RELEASE == relays.usr3_remote.coil))
+//            {
+//                set_relay_contact(&relays.usr3_remote);
+//            }
+//            else
+//            {
+//                fault_code.bit.relay_state = TRUE;
+//            }
+            if(DI_TRUE == di_value.bit.usr3o)
             {
-                set_relay_contact(&relays.usr2_remote);
+                set_relay_contact_release(&relays.usr3_remote);
             }
             else
             {
-                fault_code.bit.relay_state = TRUE;
-            }
-        }
-        if(TRUE == di_cflg.bit.usr3o && UNDONE == relays.usr3_remote.state)
-        {
-            if((DI_TRUE == di_value.bit.usr3o && OPERATE == relays.usr3_remote.coil)
-                || (DI_FALSE == di_value.bit.usr3o && RELEASE == relays.usr3_remote.coil))
-            {
-                set_relay_contact(&relays.usr3_remote);
-            }
-            else
-            {
-                fault_code.bit.relay_state = TRUE;
+                set_relay_contact_operate(&relays.usr3_remote);
             }
         }
         //sensor drive relay directly.//////////////////////////////////////////////////////////////////
@@ -334,9 +376,9 @@ static void work_task(void *pvParameters )
         }
 
         //virtual relay. Set contact immediately.//////////////////////////////////////////////////////////////////
-        if(TRUE == di_cflg.bit.liftr)
+        if(TRUE == di_cflg.bit.liftr || TRUE == di_cflg.bit.liftl || TRUE == di_cflg.bit.key1)
         {
-            if(DI_TRUE == di_value.bit.liftr)
+            if(DI_TRUE == di_value.bit.liftr || DI_TRUE == di_value.bit.liftl || DI_TRUE == di_value.bit.key1)
             {
                 set_relay_coil(&relays.lift_remote,OPERATE);
             }
@@ -346,9 +388,9 @@ static void work_task(void *pvParameters )
             }
             set_relay_contact(&relays.lift_remote);
         }
-        if(TRUE == di_cflg.bit.dropr)
+        if(TRUE == di_cflg.bit.dropr || TRUE == di_cflg.bit.dropl || TRUE == di_cflg.bit.key2)
         {
-            if(DI_TRUE == di_value.bit.dropr)
+            if(DI_TRUE == di_value.bit.dropr || DI_TRUE == di_value.bit.dropl || DI_TRUE == di_value.bit.key2)
             {
                 set_relay_coil(&relays.drop_remote,OPERATE);
             }
@@ -395,9 +437,10 @@ static void work_task(void *pvParameters )
             }
             //set_relay_contact(&relays.usr2_remote);
         }
-        if(TRUE == di_cflg.bit.usr1l || TRUE == di_cflg.bit.usr2l)
+        if(TRUE == di_cflg.bit.usr3r || TRUE == di_cflg.bit.usr4r)
         {
-            if(DI_TRUE == di_value.bit.usr1l || DI_TRUE == di_value.bit.usr2l)
+            //if(DI_TRUE == di_value.bit.usr3r || DI_TRUE == di_value.bit.usr4r || DI_TRUE == di_value.bit.key1 || DI_TRUE == di_value.bit.key2)
+            if(DI_TRUE == di_value.bit.usr3r || DI_TRUE == di_value.bit.usr4r)
             {
                 set_relay_coil(&relays.usr3_remote,OPERATE);
             }
@@ -407,6 +450,28 @@ static void work_task(void *pvParameters )
             }
             //set_relay_contact(&relays.usr3_remote);
         }
+        //local stop relay
+        if(TRUE == di_cflg.bit.stopl || TRUE == di_cflg.bit.stop_sw3)
+        {
+            if(RELEASE == relays.stop_local.coil && (DI_TRUE == di_value.bit.stopl || DI_TRUE == di_value.bit.stop_sw3))
+            {
+                set_relay_coil(&relays.stop_local,OPERATE);
+            }
+            else if(OPERATE == relays.stop_local.coil && (DI_FALSE == di_value.bit.stopl && DI_FALSE == di_value.bit.stop_sw3))
+            {
+                set_relay_coil(&relays.stop_local,RELEASE);
+            }
+            else
+            {
+                //wait action
+            }
+            set_relay_contact(&relays.stop_local);
+        }
+        //if(TRUE == di_cflg.bit.liftl)
+        //{
+            
+        //}
+
         //virtual relay. Set contact immediately.//////////////////////////////////////////////////////////////////
         //lift relay
         flag = lift_condition(&relays);
@@ -464,19 +529,6 @@ static void work_task(void *pvParameters )
             //fault_code.bit.relay_or_notfinish = TRUE;
             //wait action
         }
-        //local stop relay
-        if(RELEASE == relays.stop_local.coil && DI_TRUE == di_value.bit.stopl)
-        {
-            set_relay_coil(&relays.stop_local,OPERATE);
-        }
-        else if(OPERATE == relays.stop_local.coil && DI_FALSE == di_value.bit.stopl)
-        {
-            set_relay_coil(&relays.stop_local,RELEASE);
-        }
-        else
-        {
-            //wait action
-        }
         //brake power relay
         if(RELEASE == relays.brake_power.coil
             && ((CLOSE == relays.lift.open_contact && OPEN == relays.drop.open_contact)
@@ -518,12 +570,36 @@ static void work_task(void *pvParameters )
             }
         }
 
-        do_value.m_brake = CLOSE == relays.brake_power.open_contact ? DO_VALID : DO_INVALID;
-        do_value.m_start = CLOSE == relays.motor_start.open_contact ?  DO_VALID : DO_INVALID;
-        do_value.lift_drop = CLOSE == relays.lift.open_contact && OPEN == relays.drop.open_contact ? DO_VALID : DO_INVALID; //drop2
+        //do_value.m_brake = CLOSE == relays.brake_power.open_contact ? DO_VALID : DO_INVALID;
+        //do_value.m_start = CLOSE == relays.motor_start.open_contact ?  DO_VALID : DO_INVALID;
+        do_value.m_brake = OPERATE == relays.brake_power.coil ? DO_VALID : DO_INVALID;
+        do_value.m_start = OPERATE == relays.motor_start.coil ?  DO_VALID : DO_INVALID;
+        //do_value.lift_drop = CLOSE == relays.motor_start.open_contact && CLOSE == relays.lift.open_contact && OPEN == relays.drop.open_contact ? DO_VALID : DO_INVALID; //drop2
+        //if(CLOSE == relays.motor_start.open_contact 
+        if(CLOSE == relays.lift.open_contact && OPEN == relays.drop.open_contact)
+        {
+            do_value.lift_drop = DO_VALID;
+        }
+        //else if(CLOSE == relays.motor_start.open_contact 
+        else if(OPEN == relays.lift.open_contact && CLOSE == relays.drop.open_contact)
+        {
+            do_value.lift_drop = DO_INVALID;
+        }
+        else
+        {
+            
+        }
         do_value.usr1 = CLOSE == relays.usr1_remote.open_contact ? DO_VALID : DO_INVALID;
         do_value.usr2 = CLOSE == relays.usr2_remote.open_contact ? DO_VALID : DO_INVALID;
         do_value.usr3 = CLOSE == relays.usr3_remote.open_contact ? DO_VALID : DO_INVALID;
+
+        //do_value.m_brake = DO_INVALID;
+        //do_value.m_start = DO_INVALID;
+        //do_value.lift_drop = DO_VALID; //drop2
+        //do_value.lift_drop = DI_TRUE == di_value.bit.sw4 ? DO_VALID : DO_INVALID;
+        //do_value.usr1 = DO_INVALID;
+        //do_value.usr2 = DO_INVALID;
+        //do_value.usr3 = DO_INVALID;
         
 		vTaskDelay( WORK_PERIOD / portTICK_PERIOD_MS ); /* Delay 10 ms */
 	}
@@ -573,13 +649,19 @@ static void led_task(void *pvParameters )
         ////do_value.bit.led6 = ~led & 0x01;
         ////led++;
         //led = led < (1 << led_num)-1 ? (led + 1) : 0;
-        do_value.led1 = fault_code.bit.brake_relay_timeout;
-        do_value.led2 = fault_code.bit.lift_drop_conflict;
-        do_value.led3 = fault_code.bit.start_relay_timeout;
-        do_value.led4 = fault_code.bit.usr1_relay_timeout;
-        do_value.led5 = fault_code.bit.usr2_relay_timeout;
-        do_value.led6 = fault_code.bit.usr3_relay_timeout;
-        
+//        do_value.led1 = fault_code.bit.brake_relay_timeout;
+//        do_value.led2 = fault_code.bit.lift_drop_conflict;
+//        do_value.led3 = fault_code.bit.start_relay_timeout;
+//        do_value.led4 = fault_code.bit.usr1_relay_timeout;
+//        do_value.led5 = fault_code.bit.usr2_relay_timeout;
+//        do_value.led6 = fault_code.bit.usr3_relay_timeout;
+        do_value.led1 = do_value.lift_drop;
+        do_value.led2 = do_value.m_start;
+        do_value.led3 = do_value.m_brake;
+        do_value.led4 = do_value.usr1;
+        do_value.led5 = do_value.usr2;
+        do_value.led6 = do_value.usr3;
+
         ////do_value.bit.led6 = ~led & 0x01;
 
 		vTaskDelay( 1000 / portTICK_PERIOD_MS ); /* Delay 1000 ms */
@@ -615,7 +697,7 @@ void eth_task(void *pvParameters )
             switch(tcp_rx_buf[2])
             {
                 case 0x01:
-                    do_value.all = *(uint32_t *)&tcp_rx_buf[3];
+                    //do_value.all = *(uint32_t *)&tcp_rx_buf[3];
                     break;
                 default:
                     break;
@@ -663,8 +745,11 @@ void start_fault_task(UBaseType_t prio)
 bool lift_condition(struct relays_in_fact *relays)
 {
     //if((CLOSE == relays->lift_remote.open_contact || CLOSE == relays->lift1.open_contact || DI_TRUE == di_value.bit.lift_sw1 || CLOSE == di_value.bit.liftl)
-    if((CLOSE == relays->lift_remote.open_contact || CLOSE == relays->lift.open_contact || DI_TRUE == di_value.bit.lift_sw1 || DI_TRUE == di_value.bit.liftl)
+    if((CLOSE == relays->lift_remote.open_contact || CLOSE == relays->lift.open_contact
+        || DI_TRUE == di_value.bit.lift_sw1 || DI_TRUE == di_value.bit.liftl
+        || DI_TRUE == di_value.bit.key1)
             && CLOSE == relays->drop_remote.close_contact
+            && CLOSE == relays->stop_remote.close_contact
             && CLOSE == relays->stop_local.close_contact
             && CLOSE == relays->sensor_in1.close_contact)
     {
@@ -678,9 +763,12 @@ bool lift_condition(struct relays_in_fact *relays)
 bool drop_condition(struct relays_in_fact *relays)
 {
     //if((CLOSE == relays->drop_remote.open_contact || CLOSE == relays->drop1.open_contact || DI_TRUE == di_value.bit.drop_sw2 || CLOSE == di_value.bit.dropl)
-    if((CLOSE == relays->drop_remote.open_contact || CLOSE == relays->drop.open_contact || DI_TRUE == di_value.bit.drop_sw2 || DI_TRUE == di_value.bit.dropl)
+    if((CLOSE == relays->drop_remote.open_contact || CLOSE == relays->drop.open_contact
+        || DI_TRUE == di_value.bit.drop_sw2 || DI_TRUE == di_value.bit.dropl
+        || DI_TRUE == di_value.bit.key2)
         && CLOSE == relays->lift_remote.close_contact
         && CLOSE == relays->stop_local.close_contact
+        && CLOSE == relays->stop_remote.close_contact
         && CLOSE == relays->sensor_in2.close_contact
         && CLOSE == relays->sensor_in3.open_contact)
     {
@@ -707,8 +795,9 @@ void fault_check(uint32_t timer)
     {
         fault_code.bit.lift_drop_conflict = NORMAL;
     }
-    if((DO_VALID == do_value.m_brake && DI_TRUE == di_value.bit.brake)
-        || (DO_INVALID == do_value.m_brake && DI_FALSE == di_value.bit.brake))
+    //if((DO_VALID == do_value.m_brake && DI_TRUE == di_value.bit.brake)
+    if((OPERATE == relays.brake_power.coil && DI_TRUE == di_value.bit.brake)
+        || (RELEASE == relays.brake_power.coil && DI_FALSE == di_value.bit.brake))
     {
         brake_timer = 0;
         fault_code.bit.brake_relay_timeout = NORMAL;
@@ -721,8 +810,8 @@ void fault_check(uint32_t timer)
             fault_code.bit.brake_relay_timeout = FAULT;
         }
     }
-    if((DO_VALID == do_value.m_start && DI_TRUE == di_value.bit.z1)
-        || (DO_INVALID == do_value.m_start && DI_FALSE == di_value.bit.z1))
+    if((OPERATE == relays.motor_start.coil && DI_TRUE == di_value.bit.z1)
+        || (RELEASE == relays.motor_start.coil && DI_FALSE == di_value.bit.z1))
     {
         start_timer = 0;
         fault_code.bit.start_relay_timeout = NORMAL;
@@ -736,8 +825,8 @@ void fault_check(uint32_t timer)
         }
     }
     
-    if((DO_VALID == do_value.usr1 && DI_TRUE == di_value.bit.usr1o)
-        || (DO_INVALID == do_value.usr1 && DI_FALSE == di_value.bit.usr1o))
+    if((OPERATE == relays.usr1_remote.coil && DI_TRUE == di_value.bit.usr1o)
+        || (RELEASE == relays.usr1_remote.coil && DI_FALSE == di_value.bit.usr1o))
     {
         usr1_timer = 0;
         fault_code.bit.usr1_relay_timeout = NORMAL;
@@ -751,8 +840,8 @@ void fault_check(uint32_t timer)
         }
     }
     
-    if((DO_VALID == do_value.usr2 && DI_TRUE == di_value.bit.usr2o)
-        || (DO_INVALID == do_value.usr2 && DI_FALSE == di_value.bit.usr2o))
+    if((OPERATE == relays.usr2_remote.coil && DI_TRUE == di_value.bit.usr2o)
+        || (RELEASE == relays.usr2_remote.coil && DI_FALSE == di_value.bit.usr2o))
     {
         usr2_timer = 0;
         fault_code.bit.usr2_relay_timeout = NORMAL;
@@ -766,8 +855,8 @@ void fault_check(uint32_t timer)
         }
     }
     
-    if((DO_VALID == do_value.usr3 && DI_TRUE == di_value.bit.usr3o)
-        || (DO_INVALID == do_value.usr3 && DI_FALSE == di_value.bit.usr3o))
+    if((OPERATE == relays.usr3_remote.coil && DI_TRUE == di_value.bit.usr3o)
+        || (RELEASE == relays.usr3_remote.coil && DI_FALSE == di_value.bit.usr3o))
     {
         usr3_timer = 0;
         fault_code.bit.usr3_relay_timeout = NORMAL;

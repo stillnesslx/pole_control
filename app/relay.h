@@ -56,6 +56,8 @@ struct relays_in_fact
 extern struct relays_in_fact relays;
 extern void set_relay_coil(struct relay_DPDT *rly, RelayCoilOR ror);
 extern void set_relay_contact(struct relay_DPDT *rly);
+extern void set_relay_contact_release(struct relay_DPDT *rly);
+extern void set_relay_contact_operate(struct relay_DPDT *rly);
 //extern RelayContactOC get_contact_state();
 //enum RelayContactOC get_open_contact_state(enum RelayOR relay_or);
 
